@@ -18,6 +18,7 @@ typedef enum
 typedef int (*CompareFunc)(void* ctx, void* data);
 typedef Ret (*VisitFunc)(void* context, void* data);
 typedef void (*DataDestroyFunc)(void* ctx, void* data);
+typedef Ret (*SortFunc)(void** data, size_t nr, CompareFunc cmp);
 
 #define return_if_fail(exp) if(!(exp)) \
 							{ \
