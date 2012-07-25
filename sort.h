@@ -3,6 +3,10 @@
 
 #include "typedef.h"
 
-Ret bubble_sort(void** data, size_t nr, CompareFunc cmp);
+Ret bubble_sort(void** data, int nr, CompareFunc cmp);
+
+Ret quick_sort(void** data, int nr, CompareFunc cmp);
+
+Ret merge_sort(void** data, int nr, CompareFunc cmp);
 
 #endif
