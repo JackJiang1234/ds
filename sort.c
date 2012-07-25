@@ -1,8 +1,8 @@
 #include "sort.h"
 
-Ret bubble_sort(void** data, size_t nr, CompareFunc cmp)
+Ret bubble_sort(void** data, int nr, CompareFunc cmp)
 {
-	size_t i, j, max;
+	int i, j, max;
 	void* e;
 
 	return_val_if_fail((data != NULL) && (cmp != NULL), RET_INVALID_PARAMS);
@@ -34,6 +34,56 @@ Ret bubble_sort(void** data, size_t nr, CompareFunc cmp)
 	return RET_OK;
 }
 
+static void swap(void** a, void** b)
+{
+	void* c = *a;
+	*a = *b;
+	*b = c;
+}
+
+static int partition(void** data, int low, int high, CompareFunc cmp)
+{
+	int index = low, cursor;
+	void* pivot_key = data[low];
+	swap(&data[low], &data[high]);
+
+	for(cursor = low; cursor < high; cursor++)
+	{
+		if (cmp(data[cursor], pivot_key) < 0)
+		{
+			swap(&data[index++], &data[cursor]);	
+		}
+	}
+	swap(&data[index], &data[high]);
+
+	return index;
+
+}
+
+static void quick_sort_impl(void** data, int low, int high, CompareFunc cmp)
+{
+	if(low < high)
+	{
+		int pivot = partition(data, low, high, cmp);
+		quick_sort_impl(data, low, pivot - 1, cmp);
+		quick_sort_impl(data, pivot + 1, high, cmp);
+	}
+}
+
+Ret quick_sort(void** data, int nr, CompareFunc cmp)
+{
+	return_val_if_fail((data != NULL) && (cmp != NULL), RET_INVALID_PARAMS);
+
+	if (nr < 2)
+	{
+		return RET_OK;
+	}
+
+	quick_sort_impl(data, 0, nr-1, cmp);
+
+	return RET_OK;
+}
+
 #ifdef SORT_TEST 
 
 #include <stdio.h>
@@ -50,7 +100,7 @@ static int int_cmp_desc(void* a, void* b)
 	return (int)b - (int)a;
 }
 
-static void** array_create(size_t nr)
+static void** array_create(int nr)
 {
 	size_t i;
 	int* data = (int*)malloc(sizeof(int) * nr);
@@ -63,9 +113,9 @@ static void** array_create(size_t nr)
 	return (void**)data;
 }
 
-static void sort_test_asc(SortFunc sort, size_t nr)
+static void sort_test_asc(SortFunc sort, int nr)
 {
-	size_t i;
+	int i;
 	void** data = array_create(nr);
 
 	if (data != NULL)
@@ -82,9 +132,9 @@ static void sort_test_asc(SortFunc sort, size_t nr)
 
 }
 
-static void sort_test_desc(SortFunc sort, size_t nr)
+static void sort_test_desc(SortFunc sort, int nr)
 {
-	size_t i;
+	int i;
 	void** data = array_create(nr);
 
 	if (data != NULL)
@@ -103,7 +153,7 @@ static void sort_test_desc(SortFunc sort, size_t nr)
 
 static void sort_test(SortFunc sort)
 {
-	size_t i;
+	int i;
 
 	for(i = 0; i < 1000; i++)
 	{
@@ -117,6 +167,7 @@ int main(void)
 	printf("sort test begin.\n");
 
 	sort_test(bubble_sort);
+	sort_test(quick_sort);
 
 	printf("sort test successful.\n");
 
