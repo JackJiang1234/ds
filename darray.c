@@ -176,7 +176,7 @@ Ret darray_foreach(DArray* thiz, VisitFunc visit, void* ctx)
 
 	for(cursor = 0; cursor < thiz->size; cursor++)
 	{
-		if (ret = visit(ctx, thiz->data[cursor]) == RET_STOP)
+		if ((ret = visit(ctx, thiz->data[cursor])) == RET_STOP)
 		{
 			break;
 		}

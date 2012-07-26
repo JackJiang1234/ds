@@ -1,9 +1,16 @@
+#include <stdlib.h>
 #include "sort.h"
+
+static void swap(void** a, void** b)
+{
+	void* c = *a;
+	*a = *b;
+	*b = c;
+}
 
 Ret bubble_sort(void** data, int nr, CompareFunc cmp)
 {
 	int i, j, max;
-	void* e;
 
 	return_val_if_fail((data != NULL) && (cmp != NULL), RET_INVALID_PARAMS);
 
@@ -25,20 +32,11 @@ Ret bubble_sort(void** data, int nr, CompareFunc cmp)
 
 		if (cmp(data[max], data[i]) > 0)
 		{
-			void* e = data[max];
-			data[max] = data[i];
-			data[i] = e;
+			swap(&data[max], &data[i]);
 		}
 	}
 
 	return RET_OK;
-}
-
-static void swap(void** a, void** b)
-{
-	void* c = *a;
-	*a = *b;
-	*b = c;
 }
 
 static int partition(void** data, int low, int high, CompareFunc cmp)
@@ -82,6 +80,77 @@ Ret quick_sort(void** data, int nr, CompareFunc cmp)
 	quick_sort_impl(data, 0, nr-1, cmp);
 
 	return RET_OK;
+}
+
+static Ret merge_sort_impl(void** storage, void** data, int low, int mid, int high, CompareFunc cmp)
+{
+	int i = low;
+	int j = low;
+	int k = mid;
+
+	if ((low + 1) < mid)
+	{
+		int x = low + ((mid - low) >> 1);
+		merge_sort_impl(storage, data, low, x, mid, cmp);
+	}
+	if ((mid + 1) < high)
+	{
+		int x = mid + ((high - mid) >> 1);
+		merge_sort_impl(storage, data, mid, x, high, cmp);
+	}
+
+	while (j < mid && k < high)
+	{
+		if (cmp(data[j], data[k]) <= 0)
+		{
+			storage[i++] = data[j++];
+		}
+		else
+		{
+			storage[i++] = data[k++];
+		}
+	}
+
+	while(j < mid)
+	{
+		storage[i++] = data[j++];
+	}
+
+	while(k < high)
+	{
+		storage[i++] = data[k++];
+	}
+
+	for(i = low; i < high; i++)
+	{
+		data[i] = storage[i];
+	}
+
+	return RET_OK;
+}
+
+Ret merge_sort(void** data, int nr, CompareFunc cmp)
+{
+	Ret ret = RET_OK;
+
+	return_val_if_fail((data != NULL) && (cmp != NULL), RET_INVALID_PARAMS);
+
+	if (nr > 1)
+	{
+		void** storage = (void**)malloc(sizeof(void*) * ((size_t)nr));
+
+		if (storage != NULL)
+		{
+			ret = merge_sort_impl(storage, data, 0, nr>>1, nr, cmp);
+			free(storage);
+		}
+		else
+		{
+			ret = RET_OOM;
+		}
+	}
+
+	return ret;
 }
 
 #ifdef SORT_TEST 
@@ -168,6 +237,7 @@ int main(void)
 
 	sort_test(bubble_sort);
 	sort_test(quick_sort);
+	sort_test(merge_sort);
 
 	printf("sort test successful.\n");
 
