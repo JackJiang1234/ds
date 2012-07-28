@@ -185,6 +185,45 @@ Ret darray_foreach(DArray* thiz, VisitFunc visit, void* ctx)
 	return ret;
 }
 
+Ret darray_sort(DArray* thiz, SortFunc sort, CompareFunc cmp)
+{
+	return_val_if_fail((thiz != NULL) && (sort != NULL) && (cmp != NULL), RET_INVALID_PARAMS);
+	
+	return sort(thiz->data, thiz->size, cmp);
+}
+
+int darray_binary_search(DArray* thiz, void* data, CompareFunc cmp)
+{
+	int result;
+	int low = 0;
+	int mid = 0;
+	int high = thiz->size - 1;
+	
+	return_val_if_fail((thiz != NULL) && (cmp != NULL), -1);
+
+	while(low <= high)
+	{
+		mid = low + ((high - low) >> 1);
+
+		result = cmp(thiz->data[mid], data);
+
+		if (result > 0)
+		{
+			high = mid - 1;
+		}
+		else if (result < 0)
+		{
+			low  = mid + 1;
+		}
+		else 
+		{
+			return mid;
+		}
+	}
+
+	return -1;
+}
+
 void darray_destroy(DArray* thiz)
 {
 	size_t cursor;
@@ -205,7 +244,9 @@ void darray_destroy(DArray* thiz)
 
 #ifdef DARRAY_TEST
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
+#include "sort.h"
 
 static darray_invalid_parameter_test()
 {
@@ -290,14 +331,35 @@ static darray_normal_test()
 	darray_destroy(thiz);
 }
 
+static void darray_binary_search_test()
+{
+	int i;
+	int testNum = 101;
+	DArray* thiz = darray_create(NULL, NULL);
+
+	assert(thiz != NULL);
+	for(i = 0; i < 1000; i++)
+	{
+		assert(darray_prepend(thiz, (void*)(rand())) == RET_OK);
+	}
+
+	assert(darray_prepend(thiz, (void*)testNum) == RET_OK);
+	assert(darray_sort(thiz, quick_sort, int_cmp) == RET_OK);
+
+	assert(darray_binary_search(thiz, (void*)testNum, int_cmp) > -1);
+
+	darray_destroy(thiz);
+}
+
 int main(void)
 {
 	printf("darray test begin...\n");
 
 	darray_invalid_parameter_test();
 	darray_normal_test();
+	darray_binary_search_test();
 
-	printf("darray test successful.\n");
+	printf("darray test successful!!!!!!!!!!!\n");
 
 	return 0;
 }

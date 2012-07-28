@@ -18,6 +18,8 @@ Ret darray_set_by_index(DArray* thiz, size_t index, void* data);
 size_t darray_length(DArray* thiz);
 int darray_find(DArray* thiz, CompareFunc cmp, void* ctx);
 Ret darray_foreach(DArray* thiz, VisitFunc visit, void* ctx);
+Ret darray_sort(DArray* thiz, SortFunc sort, CompareFunc cmp);
+int darray_binary_search(DArray* thiz, void* data, CompareFunc cmp);
 
 void darray_destroy(DArray* thiz);
 
