@@ -153,6 +153,60 @@ Ret merge_sort(void** data, int nr, CompareFunc cmp)
 	return ret;
 }
 
+Ret select_sort(void** data, int nr, CompareFunc cmp)
+{
+	return_val_if_fail((data != NULL) && (cmp != NULL), RET_INVALID_PARAMS);
+
+	if (nr > 1)
+	{
+		int i, j, min;
+
+		for(i = 0; i < nr - 2; i++)
+		{
+			min = i;
+			for(j = i + 1; j < nr - 1; j++)
+			{
+				if (cmp(data[j], data[min]) < 0)
+				{
+					min = j;
+				}
+			}
+
+			if (i != min)
+			{
+				swap(&data[i], &data[min]);
+			}
+		}
+	}
+
+	return RET_OK;
+}
+
+Ret insert_sort(void** data, int nr, CompareFunc cmp)
+{
+	return_val_if_fail((data != NULL) && (cmp != NULL), RET_INVALID_PARAMS);
+
+	if (nr > 1)
+	{
+		int i, j, insert;
+
+		for(i = 0; i < nr - 2; i++)
+		{
+			for(j = i + 1; j < nr - 1; j++)
+			{
+				insert = j;
+				while ((insert > 0) && (cmp(data[insert], data[insert - 1])) < 0)
+				{
+					swap(&data[insert], &data[insert - 1]);
+					insert--;
+				}
+			}
+		}
+	}
+
+	return RET_OK;
+}
+
 #ifdef SORT_TEST 
 
 #include <stdio.h>
@@ -238,6 +292,8 @@ int main(void)
 	sort_test(bubble_sort);
 	sort_test(quick_sort);
 	sort_test(merge_sort);
+	sort_test(select_sort);
+	sort_test(insert_sort);
 
 	printf("sort test successful.\n");
 
