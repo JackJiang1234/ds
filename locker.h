@@ -1,7 +1,7 @@
 #ifndef LOCKER_H
 #define LOCKER_H
 
-#include "typdef.h"
+#include "typedef.h"
 
 struct _Locker;
 typedef struct _Locker Locker;
@@ -13,11 +13,11 @@ typedef void (*LockerDestroyFunc)(Locker* thiz);
 struct _Locker
 {
 	LockerLockFunc lock;
-	LockerUnlockFunc unlock;
+	LockerUnLockFunc unlock;
 	LockerDestroyFunc destroy;
 
 	char priv[0];
-}
+};
 
 static inline Ret locker_lock(Locker* thiz)
 {
@@ -35,7 +35,7 @@ static inline Ret locker_unlock(Locker* thiz)
 
 static inline void locker_destroy(Locker* thiz)
 {
-	return_val_if_fail((thiz != NULL) && (thiz->destroy != NULL), RET_INVALID_PARAMS);
+	return_if_fail((thiz != NULL) && (thiz->destroy != NULL));
 
 	thiz->destroy(thiz);
 }

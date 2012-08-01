@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <stdlib.h>
 #include "locker_pthread.h"
 
 typedef struct _PrivInfo
@@ -16,7 +17,7 @@ static Ret locker_pthread_lock(Locker* thiz)
 
 static Ret locker_pthread_unlock(Locker* thiz)
 {
-	Privinfo* priv = (PrivInfo*)thiz->priv;
+	PrivInfo* priv = (PrivInfo*)thiz->priv;
 	int ret = pthread_mutex_unlock(&priv->mutex);
 
 	return ret == 0 ? RET_OK : RET_FAIL;
@@ -24,8 +25,8 @@ static Ret locker_pthread_unlock(Locker* thiz)
 
 static void locker_pthread_destroy(Locker* thiz)
 {
-	Privinfo* priv = (PrivInfo*)thiz->priv;
-	int ret = pthread_mutex_destroy(&priv->mutex);
+	PrivInfo* priv = (PrivInfo*)thiz->priv;
+    pthread_mutex_destroy(&priv->mutex);
 	free(thiz);
 }
 
@@ -40,5 +41,9 @@ Locker* locker_pthread_create(void)
 		thiz->lock = locker_pthread_lock;
 		thiz->unlock = locker_pthread_unlock;
 		thiz->destroy = locker_pthread_destroy;
+
+		pthread_mutex_init(&(priv->mutex), NULL);
 	}
+
+	return thiz;
 }
